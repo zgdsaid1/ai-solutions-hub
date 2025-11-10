@@ -1,0 +1,94 @@
+{
+  "products": [
+    {
+      "id": "starter",
+      "name": "Starter Plan",
+      "description": "Perfect for individuals getting started with AI",
+      "price": 9,
+      "currency": "usd",
+      "interval": "month",
+      "features": [
+        "3 AI Tools Access",
+        "175K Tokens/month",
+        "15-day Trial Period",
+        "Email Support",
+        "Basic Analytics"
+      ],
+      "priceId": "price_starter_monthly_9"
+    },
+    {
+      "id": "pro",
+      "name": "Pro Plan",
+      "description": "Best for professionals and small teams",
+      "price": 29,
+      "currency": "usd",
+      "interval": "month",
+      "features": [
+        "6 AI Tools Access",
+        "500K Tokens/month",
+        "7-day Trial Period",
+        "Priority Email Support",
+        "Advanced Analytics",
+        "API Access"
+      ],
+      "priceId": "price_pro_monthly_29",
+      "recommended": true
+    },
+    {
+      "id": "business",
+      "name": "Business Plan",
+      "description": "For growing businesses and teams",
+      "price": 99,
+      "currency": "usd",
+      "interval": "month",
+      "features": [
+        "7 AI Tools Access",
+        "2M Tokens/month",
+        "No Trial (Immediate Access)",
+        "Priority Support + Phone",
+        "Advanced Analytics",
+        "API Access",
+        "Custom Integrations",
+        "Team Collaboration"
+      ],
+      "priceId": "price_business_monthly_99"
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise Plan",
+      "description": "Full platform for large organizations",
+      "price": 299,
+      "currency": "usd",
+      "interval": "month",
+      "features": [
+        "All 8 AI Tools Access",
+        "Unlimited Tokens",
+        "No Trial (Immediate Access)",
+        "24/7 Premium Support",
+        "Advanced Analytics",
+        "Full API Access",
+        "Custom Integrations",
+        "White-label Options",
+        "Dedicated Account Manager",
+        "Custom SLA"
+      ],
+      "priceId": "price_enterprise_monthly_299"
+    }
+  ],
+  "webhookEvents": [
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted",
+    "invoice.payment_succeeded",
+    "invoice.payment_failed",
+    "checkout.session.completed"
+  ],
+  "testMode": false,
+  "setupInstructions": {
+    "1": "Create Stripe account at https://stripe.com",
+    "2": "Create products in Stripe Dashboard",
+    "3": "Copy Price IDs and update this config",
+    "4": "Set up webhook endpoint",
+    "5": "Deploy to Railway and Vercel"
+  }
+}
