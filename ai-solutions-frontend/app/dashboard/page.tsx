@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
   Brain, 
   FileText, 
@@ -26,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { user, signOut } = useAuth();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -120,6 +123,15 @@ export default function DashboardPage() {
     { action: 'Data analysis completed', tool: 'Data Analyzer', time: '3 hours ago' }
   ];
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const handleToolClick = (toolId: string) => {
     setSelectedTool(toolId);
     // Here you would navigate to the specific tool interface
@@ -127,7 +139,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -168,7 +181,7 @@ export default function DashboardPage() {
                   <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
                     <User className="h-5 w-5 text-white" />
                   </div>
-                  <span className="hidden md:block">John Doe</span>
+                  <span className="hidden md:block">{user?.user_metadata?.full_name || user?.email || 'User'}</span>
                 </button>
               </div>
             </div>
@@ -242,7 +255,10 @@ export default function DashboardPage() {
             </div>
 
             <div className="px-6 py-4 border-t border-gray-200">
-              <button className="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+              <button 
+                onClick={handleSignOut}
+                className="w-full flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
                 <LogOut className="h-5 w-5 mr-3" />
                 Sign Out
               </button>
@@ -395,6 +411,6 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

@@ -1,12 +1,13 @@
-import './globals.css'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: 'AI Solutions Hub - Empower Your Business with AI',
-  description: 'Complete AI-powered business automation platform with marketing, legal, content creation, and more tools.',
-  keywords: 'AI, business automation, marketing, legal, content creation, artificial intelligence',
+export const metadata: Metadata = {
+  title: 'AI Solutions Hub',
+  description: 'Transform your business with AI-powered tools',
 }
 
 export default function RootLayout({
@@ -17,9 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
+        <AuthProvider>
           {children}
-        </div>
+        </AuthProvider>
       </body>
     </html>
   )

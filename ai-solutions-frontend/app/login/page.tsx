@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Brain, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
+  const { signIn } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,17 +28,16 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Here you would integrate with your authentication system
-      console.log('Login attempt:', formData);
+      const { success, error } = await signIn(formData.email, formData.password);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Redirect to dashboard on success
-      // window.location.href = '/dashboard';
-      
+      if (success) {
+        // Redirect to dashboard on success
+        window.location.href = '/dashboard';
+      } else {
+        setError(error || 'Invalid email or password. Please try again.');
+      }
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }

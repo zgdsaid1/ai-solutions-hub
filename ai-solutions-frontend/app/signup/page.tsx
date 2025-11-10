@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Brain, Eye, EyeOff, ArrowLeft, Check } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -58,17 +60,16 @@ export default function SignupPage() {
     setError('');
 
     try {
-      // Here you would integrate with your authentication system
-      console.log('Signup attempt:', formData);
+      const { success, error } = await signUp(formData.email, formData.password, formData.fullName);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirect to dashboard or verification page on success
-      // window.location.href = '/verify-email';
-      
+      if (success) {
+        // Redirect to dashboard or verification page on success
+        window.location.href = '/dashboard';
+      } else {
+        setError(error || 'Failed to create account. Please try again.');
+      }
     } catch (err) {
-      setError('Failed to create account. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
