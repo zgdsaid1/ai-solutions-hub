@@ -202,7 +202,6 @@ supabase functions deploy
 
 ## Documentation
 
-- [File Inventory](FILES_INVENTORY.md) - Comprehensive overview of all project files (Bilingual: English/Arabic)
 - [Architecture Specification](docs/hybrid_system_architecture.md)
 - [Design System](docs/ai_solutions_hub_design_system.md)
 - [Wireframes & User Flows](docs/wireframes_and_user_flows.md)
