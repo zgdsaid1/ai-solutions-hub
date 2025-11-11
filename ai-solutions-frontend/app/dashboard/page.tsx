@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
   Brain, 
   FileText, 
