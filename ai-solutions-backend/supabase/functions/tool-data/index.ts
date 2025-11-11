@@ -45,7 +45,7 @@ Be specific with numbers and provide actionable business insights.`;
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                model: 'gpt-3.5-turbo',
                 messages: [
                     {
                         role: 'system',
@@ -78,7 +78,7 @@ Be specific with numbers and provide actionable business insights.`;
                 usage: {
                     tokensUsed,
                     cost,
-                    engine: 'openai-gpt4'
+                    engine: 'openai-gpt-3.5-turbo'
                 }
             }
         }), {

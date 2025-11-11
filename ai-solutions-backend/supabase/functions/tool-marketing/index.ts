@@ -48,7 +48,7 @@ Format the response with clear sections and actionable insights.`;
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                model: 'gpt-3.5-turbo',
                 messages: [
                     {
                         role: 'system',
@@ -88,7 +88,7 @@ Format the response with clear sections and actionable insights.`;
                 usage: {
                     tokensUsed,
                     cost,
-                    engine: 'openai-gpt4'
+                    engine: 'openai-gpt-3.5-turbo'
                 }
             }
         }), {

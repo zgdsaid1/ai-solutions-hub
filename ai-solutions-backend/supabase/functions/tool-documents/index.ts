@@ -49,7 +49,7 @@ Provide:
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                model: 'gpt-3.5-turbo',
                 messages: [
                     {
                         role: 'system',
@@ -83,7 +83,7 @@ Provide:
                 usage: {
                     tokensUsed,
                     cost,
-                    engine: 'openai-gpt4'
+                    engine: 'openai-gpt-3.5-turbo'
                 }
             }
         }), {

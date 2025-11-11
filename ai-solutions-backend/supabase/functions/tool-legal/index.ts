@@ -47,7 +47,7 @@ Be specific, professional, and provide actionable legal insights.`;
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                model: 'gpt-3.5-turbo',
                 messages: [
                     {
                         role: 'system',
@@ -84,7 +84,7 @@ Be specific, professional, and provide actionable legal insights.`;
                 usage: {
                     tokensUsed,
                     cost,
-                    engine: 'openai-gpt4'
+                    engine: 'openai-gpt-3.5-turbo'
                 }
             }
         }), {
