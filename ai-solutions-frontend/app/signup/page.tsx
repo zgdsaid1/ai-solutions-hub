@@ -46,7 +46,8 @@ export default function SignupPage() {
       if (error) throw error
 
       toast.success('Account created! Please check your email to verify.')
-      router.push('/login')
+      // Redirect to dashboard - user will need to verify email first
+      router.push('/dashboard')
     } catch (error: any) {
       toast.error(error.message || 'Failed to create account')
     } finally {
@@ -85,6 +86,11 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="John Doe"
                 required
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.5',
+                  fontFamily: 'inherit'
+                }}
               />
             </div>
 
@@ -100,6 +106,11 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="you@example.com"
                 required
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.5',
+                  fontFamily: 'inherit'
+                }}
               />
             </div>
 
@@ -117,11 +128,17 @@ export default function SignupPage() {
                   placeholder="Min. 6 characters"
                   required
                   minLength={6}
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '1.5',
+                    fontFamily: 'inherit'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />
@@ -145,11 +162,17 @@ export default function SignupPage() {
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Confirm your password"
                   required
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '1.5',
+                    fontFamily: 'inherit'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />

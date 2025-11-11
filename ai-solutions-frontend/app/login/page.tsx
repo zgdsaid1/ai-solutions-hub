@@ -57,6 +57,11 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="you@example.com"
                 required
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.5',
+                  fontFamily: 'inherit'
+                }}
               />
             </div>
 
@@ -73,11 +78,17 @@ export default function LoginPage() {
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter your password"
                   required
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '1.5',
+                    fontFamily: 'inherit'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />
