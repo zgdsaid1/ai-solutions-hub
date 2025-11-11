@@ -22,7 +22,8 @@ export default function LoginPage() {
     try {
       await signIn(email, password)
       toast.success('Welcome back!')
-      router.push('/dashboard')
+      // Redirect to main page after successful login
+      router.push('/')
     } catch (error: any) {
       toast.error(error.message || 'Failed to login')
     } finally {
