@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../lib/supabase'
+import { supabase } from '@/lib/supabase'
 import toast, { Toaster } from 'react-hot-toast'
 import { Brain, Eye, EyeOff } from 'lucide-react'
 

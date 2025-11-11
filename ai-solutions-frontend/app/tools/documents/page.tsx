@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, ArrowLeft, Loader2, Download, Eye } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callDocumentTool } from "../../../lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
+import { callDocumentTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function DocumentsToolPage() {

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Scale, ArrowLeft, Loader2, FileText } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callLegalTool } from "../../../lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
+import { callLegalTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function LegalToolPage() {
