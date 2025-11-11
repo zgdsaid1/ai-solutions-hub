@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BarChart3, ArrowLeft, Loader2 } from "lucide-react";
+import { BarChart3, ArrowLeft, Loader2, Save, Download } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callDataAnalysisTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function DataToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     dataInput: "",
@@ -56,11 +59,51 @@ export default function DataToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success("Data analyzed successfully!");
     } catch (error: any) {
       toast.error(error.message || "An error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Data Analysis Engine",
+        toolType: "data",
+        inputData: formData,
+        outputData: result,
+        title: `Data Analysis Engine Result - ${new Date().toLocaleDateString()}`,
+        description: `Result from Data Analysis Engine`,
+        tags: ["data"],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `data_result.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
     }
   };
 

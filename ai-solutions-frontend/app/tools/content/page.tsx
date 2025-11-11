@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { FileText, ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callContentTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function ContentToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     topic: "",
@@ -57,6 +60,7 @@ export default function ContentToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success("Content generated successfully!");
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -76,6 +80,45 @@ export default function ContentToolPage() {
       audience: "general",
       keywords: "",
     });
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Content Creator",
+        toolType: "content",
+        inputData: formData,
+        outputData: result,
+        title: `Content Creator Result - ${new Date().toLocaleDateString()}`,
+        description: `Result from Content Creator`,
+        tags: ["content"],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `content_result.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
+    }
   };
 
   return (

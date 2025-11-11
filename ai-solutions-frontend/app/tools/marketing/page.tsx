@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, ArrowLeft, Loader2 } from "lucide-react";
+import { TrendingUp, ArrowLeft, Loader2, Save, Download, Share2 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callMarketingTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MarketingToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     industry: "",
@@ -47,11 +50,51 @@ export default function MarketingToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success("Marketing strategy generated successfully!");
     } catch (error: any) {
       toast.error(error.message || "An error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Marketing Strategist",
+        toolType: "marketing",
+        inputData: formData,
+        outputData: result,
+        title: `Marketing Strategy - ${formData.industry}`,
+        description: `Marketing analysis for ${formData.industry} targeting ${formData.targetAudience}`,
+        tags: [formData.industry, formData.region, formData.targetAudience],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `marketing_strategy_${formData.industry}.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
     }
   };
 
@@ -263,21 +306,74 @@ export default function MarketingToolPage() {
                 )}
               </div>
 
-              <button
-                onClick={() => {
-                  setResult(null);
-                  setFormData({
-                    industry: "",
-                    analysisDepth: "comprehensive",
-                    region: "North America",
-                    budgetRange: "$10K-50K",
-                    targetAudience: "B2B Enterprise",
-                  });
-                }}
-                className="mt-6 w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-              >
-                Generate Another Strategy
-              </button>
+              {/* Action Buttons */}
+              <div className="mt-6 space-y-3">
+                {/* Save and Export Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || !!savedResultId}
+                    className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
+                      savedResultId
+                        ? "bg-green-100 text-green-700 cursor-default"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    {saving ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Save className="h-5 w-5" />
+                    )}
+                    {savedResultId ? "Saved" : "Save Result"}
+                  </button>
+
+                  <button
+                    onClick={() => handleExport('json')}
+                    disabled={!savedResultId}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="h-5 w-5" />
+                    Export JSON
+                  </button>
+
+                  <button
+                    onClick={() => handleExport('txt')}
+                    disabled={!savedResultId}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="h-5 w-5" />
+                    Export TXT
+                  </button>
+                </div>
+
+                {/* Generate Another Button */}
+                <button
+                  onClick={() => {
+                    setResult(null);
+                    setSavedResultId(null);
+                    setFormData({
+                      industry: "",
+                      analysisDepth: "comprehensive",
+                      region: "North America",
+                      budgetRange: "$10K-50K",
+                      targetAudience: "B2B Enterprise",
+                    });
+                  }}
+                  className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Generate Another Strategy
+                </button>
+
+                {/* View History Link */}
+                {savedResultId && (
+                  <button
+                    onClick={() => router.push('/dashboard/history')}
+                    className="w-full text-blue-600 hover:text-blue-700 px-6 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    View Results History
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </main>

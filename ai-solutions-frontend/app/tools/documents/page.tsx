@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { FileText, ArrowLeft, Loader2, Download, Eye } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callDocumentTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function DocumentsToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     documentType: "contract",
@@ -70,6 +73,7 @@ export default function DocumentsToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success(`Document ${formData.action === 'generate' ? 'generated' : 'reviewed'} successfully!`);
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -92,6 +96,45 @@ export default function DocumentsToolPage() {
       industry: "",
       jurisdiction: "",
     });
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Document Automation",
+        toolType: "documents",
+        inputData: formData,
+        outputData: result,
+        title: `Document Automation Result - ${new Date().toLocaleDateString()}`,
+        description: `Result from Document Automation`,
+        tags: ["documents"],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `documents_result.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
+    }
   };
 
   return (

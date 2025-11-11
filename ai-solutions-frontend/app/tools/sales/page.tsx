@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { Target, ArrowLeft, Loader2, TrendingUp } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callSalesTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function SalesToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     industry: "",
@@ -71,6 +74,7 @@ export default function SalesToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success("Sales strategy generated successfully!");
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -92,6 +96,45 @@ export default function SalesToolPage() {
       customerInfo: "",
       painPoints: "",
     });
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Sales Assistant",
+        toolType: "sales",
+        inputData: formData,
+        outputData: result,
+        title: `Sales Assistant Result - ${new Date().toLocaleDateString()}`,
+        description: `Result from Sales Assistant`,
+        tags: ["sales"],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `sales_result.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
+    }
   };
 
   return (

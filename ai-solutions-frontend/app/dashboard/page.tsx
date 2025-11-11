@@ -13,7 +13,8 @@ import {
   Briefcase,
   MessageCircle,
   Mail,
-  FileText
+  FileText,
+  History
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -140,13 +141,22 @@ export default function DashboardPage() {
                   <p className="text-sm text-gray-600">Welcome back, {user?.email?.split('@')[0]}</p>
                 </div>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-              >
-                <LogOut className="h-5 w-5" />
-                <span className="font-medium">Sign Out</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => router.push('/dashboard/history')}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                >
+                  <History className="h-5 w-5" />
+                  <span className="font-medium">History</span>
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium">Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         </header>

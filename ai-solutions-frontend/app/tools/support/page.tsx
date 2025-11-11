@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { MessageCircle, ArrowLeft, Loader2, Bot } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { callSupportTool } from "@/lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function SupportToolPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     customerQuery: "",
@@ -59,6 +62,7 @@ export default function SupportToolPage() {
       }
 
       setResult(response.data);
+      setSavedResultId(null); // Reset saved state for new result
       toast.success("Support analysis completed successfully!");
     } catch (error) {
       toast.error("An unexpected error occurred");
@@ -79,6 +83,45 @@ export default function SupportToolPage() {
       previousInteractions: "",
       customerType: "existing",
     });
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveResult({
+        toolName: "Customer Support Bot",
+        toolType: "support",
+        inputData: formData,
+        outputData: result,
+        title: `Customer Support Bot Result - ${new Date().toLocaleDateString()}`,
+        description: `Result from Customer Support Bot`,
+        tags: ["support"],
+      });
+      
+      setSavedResultId(saved.id);
+      toast.success("Result saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save result");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = async (format: 'json' | 'txt' | 'csv') => {
+    if (!savedResultId) {
+      toast.error("Please save the result first");
+      return;
+    }
+
+    try {
+      const blob = await exportResult(savedResultId, format);
+      downloadExportedResult(blob, `support_result.${format}`);
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to export result");
+    }
   };
 
   return (
