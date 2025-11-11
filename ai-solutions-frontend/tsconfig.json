@@ -17,9 +17,12 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./ai-solutions-frontend",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]
+      "@/components/*": ["ai-solutions-frontend/components/*"],
+      "@/contexts/*": ["ai-solutions-frontend/contexts/*"],
+      "@/lib/*": ["ai-solutions-frontend/lib/*"],
+      "@/*": ["ai-solutions-frontend/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
