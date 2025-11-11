@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/signup', '/about', '/pricing', '/contact']
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/about', '/pricing', '/contact']
   
   // Define protected routes that require authentication
   const protectedRoutes = ['/dashboard']

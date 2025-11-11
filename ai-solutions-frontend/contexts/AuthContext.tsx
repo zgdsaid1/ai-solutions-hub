@@ -11,6 +11,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const { error, data } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -59,24 +61,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
     if (error) throw error;
-
-    // Create user profile
-    if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: data.user.id,
-        email: data.user.email,
-        full_name: fullName,
-        subscription_tier: 'basic',
-      });
-      
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-      }
-    }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
     if (error) throw error;
   };
 
@@ -87,7 +89,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading, 
       signIn, 
       signUp, 
-      signOut
+      signOut,
+      resetPassword,
+      updatePassword
     }}>
       {children}
     </AuthContext.Provider>
