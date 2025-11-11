@@ -6,6 +6,7 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: 'ai-solutions-hub',
   },
+  trailingSlash: false,
 }
 
 module.exports = nextConfig
