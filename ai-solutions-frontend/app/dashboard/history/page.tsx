@@ -11,7 +11,7 @@ import {
   downloadExportedResult,
   type Result,
   type GetResultsParams 
-} from '@/lib/results';
+} from '../../../lib/results';
 import { 
   Search, Download, Share2, Trash2, Star, Calendar,
   Filter, ChevronLeft, ChevronRight, FileText, Database,

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Target, ArrowLeft, Loader2, TrendingUp } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callSalesTool } from "@/lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
+import { callSalesTool } from "../../../lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function SalesToolPage() {

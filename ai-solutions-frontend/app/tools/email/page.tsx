@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, ArrowLeft, Loader2, Send } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callEmailTool, EmailRequest } from "@/lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
+import { callEmailTool, EmailRequest } from "../../../lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function EmailToolPage() {

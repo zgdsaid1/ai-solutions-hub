@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, ArrowLeft, Loader2, Save, Download, Share2 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callMarketingTool } from "@/lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
+import { callMarketingTool } from "../../../lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MarketingToolPage() {

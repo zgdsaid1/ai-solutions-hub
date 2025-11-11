@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callContentTool } from "@/lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
+import { callContentTool } from "../../../lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function ContentToolPage() {

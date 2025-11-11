@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MessageCircle, ArrowLeft, Loader2, Bot } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { callSupportTool } from "@/lib/ai-tools";
-import { saveResult, exportResult, downloadExportedResult } from "@/lib/results";
+import { callSupportTool } from "../../../lib/ai-tools";
+import { saveResult, exportResult, downloadExportedResult } from "../../../lib/results";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function SupportToolPage() {
