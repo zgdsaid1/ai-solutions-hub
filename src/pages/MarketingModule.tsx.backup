@@ -1,0 +1,1114 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
+import {
+  Sparkles,
+  TrendingUp,
+  ArrowLeft,
+  Calendar,
+  Target,
+  DollarSign,
+  Users,
+  Zap,
+  CheckCircle,
+  Download,
+  Copy,
+  Loader2
+} from 'lucide-react';
+
+interface CampaignFormData {
+  businessType: string;
+  targetAudience: string;
+  campaignGoals: string;
+  budget: string;
+  timeline: string;
+  channels: string[];
+  brandInfo: string;
+}
+
+export default function MarketingModule() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [campaign, setCampaign] = useState<any>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [formData, setFormData] = useState<CampaignFormData>({
+    businessType: '',
+    targetAudience: '',
+    campaignGoals: '',
+    budget: '',
+    timeline: '30',
+    channels: [],
+    brandInfo: ''
+  });
+
+  const businessTypes = [
+    'E-commerce',
+    'SaaS',
+    'Local Business',
+    'B2B Services',
+    'Healthcare',
+    'Education',
+    'Real Estate',
+    'Restaurant/Food',
+    'Retail Store',
+    'Professional Services'
+  ];
+
+  const goals = [
+    'Brand Awareness',
+    'Lead Generation',
+    'Sales Growth',
+    'Customer Retention',
+    'Product Launch',
+    'Event Promotion',
+    'App Downloads',
+    'Website Traffic'
+  ];
+
+  const channels = [
+    { id: 'social_media', label: 'Social Media', icon: '📱' },
+    { id: 'email', label: 'Email Marketing', icon: '📧' },
+    { id: 'content', label: 'Content Marketing', icon: '📝' },
+    { id: 'paid_ads', label: 'Paid Advertising', icon: '💰' },
+    { id: 'seo', label: 'SEO', icon: '🔍' },
+    { id: 'influencer', label: 'Influencer Marketing', icon: '⭐' }
+  ];
+
+  const handleInputChange = (field: keyof CampaignFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleChannel = (channelId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      channels: prev.channels.includes(channelId)
+        ? prev.channels.filter(c => c !== channelId)
+        : [...prev.channels, channelId]
+    }));
+  };
+
+  const generateCampaign = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-solutions-marketing', {
+        body: formData
+      });
+
+      if (error) {
+        console.error('Campaign generation error:', error);
+        // Generate a fallback campaign locally
+        const fallbackCampaign = generateFallbackCampaign(formData);
+        setCampaign({ ...fallbackCampaign, isFallback: true });
+        setStep(4);
+        return;
+      }
+
+      setCampaign({ ...data.data, isFallback: false });
+      setStep(4);
+    } catch (error: any) {
+      console.error('Campaign generation error:', error);
+      // Generate a fallback campaign when edge function fails
+      const fallbackCampaign = generateFallbackCampaign(formData);
+      setCampaign({ ...fallbackCampaign, isFallback: true });
+      setStep(4);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateFallbackCampaign = (formData: CampaignFormData) => {
+    const {
+      businessType,
+      targetAudience,
+      campaignGoals,
+      budget,
+      timeline,
+      channels,
+      brandInfo
+    } = formData;
+
+    return {
+      campaignName: `${businessType} ${campaignGoals} Campaign`,
+      overview: `Targeted ${campaignGoals.toLowerCase()} strategy for ${businessType} businesses. Focus on ${targetAudience} through ${channels.join(', ')} channels within ${timeline} days and ${budget} budget.`,
+      
+      contentStrategy: {
+        socialMediaPosts: [
+          {
+            platform: 'LinkedIn',
+            caption: `🚀 ${campaignGoals} for ${businessType}! Helping ${targetAudience} achieve measurable results. Our approach focuses on ${channels.slice(0, 2).join(' and ')}. ${brandInfo ? `Committed to ${brandInfo}.` : 'Dedicated to your success.'}`,
+            hashtags: [`#${businessType.replace(/\s+/g, '')}`, '#Growth', '#Marketing']
+          },
+          {
+            platform: 'Twitter', 
+            caption: `💡 Proven ${campaignGoals.toLowerCase()} strategies for ${businessType}. ${targetAudience} trust our methods for real results.`,
+            hashtags: [`#${campaignGoals.replace(/\s+/g, '')}`, '#BusinessGrowth']
+          },
+          {
+            platform: 'Instagram',
+            caption: `✨ ${businessType} success story: How we help ${targetAudience} achieve ${campaignGoals.toLowerCase()} faster.`,
+            hashtags: [`#${businessType.replace(/\s+/g, '')}`, '#Success']
+          }
+        ],
+
+        emailSequence: [
+          {
+            subject: `Special ${businessType} Offer - ${campaignGoals} Ready`,
+            preview: `Exclusive strategies for ${targetAudience}`,
+            content: `Get our proven ${campaignGoals.toLowerCase()} blueprint specifically designed for ${businessType} businesses.`
+          },
+          {
+            subject: `5 ${campaignGoals} Tips for ${businessType}`,
+            preview: `Industry insights for ${targetAudience}`,
+            content: `Download our comprehensive guide with actionable strategies for immediate implementation.`
+          }
+        ],
+
+        adCopy: {
+          headlines: [
+            `${campaignGoals} Made Simple for ${businessType}`,
+            `${targetAudience} Choose Our Proven System`,
+            `Get ${campaignGoals} Results in ${timeline} Days`
+          ],
+          descriptions: [
+            `Proven strategies for ${businessType} businesses targeting ${targetAudience}.`,
+            `Get measurable ${campaignGoals.toLowerCase()} results within ${timeline} days.`,
+            `Professional approach trusted by ${targetAudience}.`
+          ]
+        }
+      },
+
+      actionPlan: {
+        week1: `Focus on ${channels[0] || 'Social Media'} strategy development and initial content creation`,
+        week2: `Launch ${channels[1] || 'Email Marketing'} campaigns and monitor key performance indicators`,
+        week3: `Optimize based on early results and scale successful elements`,
+        week4: `Analyze performance and prepare for next phase expansion`
+      },
+
+      metrics: {
+        kpis: [
+          `Increase ${campaignGoals.toLowerCase()} by 25% within ${timeline} days`,
+          `Generate quality leads from ${targetAudience}`,
+          `Improve brand awareness in target market`,
+          `Achieve positive ROI within campaign timeline`
+        ],
+        trackingTools: [
+          'Google Analytics',
+          'Social Media Analytics',
+          'Email Marketing Platform',
+          'Campaign Performance Dashboard'
+        ]
+      },
+
+      channelStrategy: channels.map(channel => ({
+        channel,
+        strategy: `Implement targeted campaigns for ${channel.replace('_', ' ')} to achieve ${campaignGoals.toLowerCase()}`,
+        budget: budget || '$500-1000',
+        kpis: ['Engagement Rate', 'Click-through Rate', 'Conversion Rate']
+      }))
+    };
+  };
+
+  const copyToClipboard = async () => {
+    if (!campaign) {
+      console.log('No campaign data available');
+      return;
+    }
+    
+    try {
+      // Generate clean, readable text for clipboard (no markdown formatting)
+      const readableContent = generateReadableContent(campaign);
+      await navigator.clipboard.writeText(readableContent);
+      setCopySuccess(true);
+      
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      // Fallback for older browsers
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = generateReadableContent(campaign);
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopySuccess(true);
+        
+        setTimeout(() => {
+          setCopySuccess(false);
+        }, 3000);
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        alert('Copy failed. Please try again.');
+      }
+    }
+  };
+
+  const generateCampaignContent = (campaign: any) => {
+    return `# ${campaign.campaignName || 'Marketing Campaign'}
+
+## Campaign Overview
+${campaign.overview || 'No overview available'}
+
+## Target Audience
+${formData.targetAudience || 'Not specified'}
+
+## Campaign Goals
+${formData.campaignGoals || 'Not specified'}
+
+## Budget
+${formData.budget || 'Not specified'}
+
+## Timeline
+${formData.timeline || '30'} days
+
+## Marketing Channels
+${formData.channels.length > 0 ? formData.channels.map((channel: string) => `- ${channel.replace('_', ' ')}`).join('\n') : 'No channels specified'}
+
+## Content Strategy
+${campaign.contentStrategy ? JSON.stringify(campaign.contentStrategy, null, 2) : 'Content strategy not available'}
+
+## Action Plan
+${campaign.actionPlan ? JSON.stringify(campaign.actionPlan, null, 2) : 'Action plan not available'}
+
+## Metrics & KPIs
+${campaign.metrics ? JSON.stringify(campaign.metrics, null, 2) : 'Metrics not available'}
+
+## Channel Strategy
+${campaign.channelStrategy ? JSON.stringify(campaign.channelStrategy, null, 2) : 'Channel strategy not available'}
+
+---
+Generated by AI Solutions Hub`;
+  };
+
+  const generateHTMLContent = (campaign: any) => {
+    return `
+      <div class="header">
+        <h1>${campaign.campaignName || 'Marketing Campaign'}</h1>
+        <p>Generated by AI Solutions Hub on ${new Date().toLocaleDateString()}</p>
+      </div>
+
+      <div class="overview">
+        <h2>Campaign Overview</h2>
+        <p><strong>Campaign:</strong> ${campaign.campaignName || 'Not specified'}</p>
+        <p><strong>Overview:</strong> ${campaign.overview || 'No overview available'}</p>
+      </div>
+
+      <div class="section">
+        <h2>Campaign Details</h2>
+        <p><strong>Business Type:</strong> ${formData.businessType || 'Not specified'}</p>
+        <p><strong>Target Audience:</strong> ${formData.targetAudience || 'Not specified'}</p>
+        <p><strong>Campaign Goals:</strong> ${formData.campaignGoals || 'Not specified'}</p>
+        <p><strong>Budget:</strong> ${formData.budget || 'Not specified'}</p>
+        <p><strong>Timeline:</strong> ${formData.timeline || '30'} days</p>
+        <p><strong>Marketing Channels:</strong> ${formData.channels.length > 0 ? formData.channels.map((channel: string) => channel.replace('_', ' ')).join(', ') : 'No channels specified'}</p>
+      </div>
+
+      ${campaign.contentStrategy ? `
+      <div class="section">
+        <h2>Content Strategy</h2>
+        
+        ${campaign.contentStrategy.socialMediaPosts ? `
+        <h3>Social Media Posts</h3>
+        ${campaign.contentStrategy.socialMediaPosts.map((post: any, idx: number) => `
+          <div class="channel-strategy">
+            <h4>${post.platform}</h4>
+            <p><strong>Caption:</strong> ${post.caption}</p>
+            <p><strong>Hashtags:</strong> ${post.hashtags ? post.hashtags.join(', ') : 'None'}</p>
+          </div>
+        `).join('')}
+        ` : ''}
+
+        ${campaign.contentStrategy.emailSequence ? `
+        <h3>Email Marketing Sequence</h3>
+        ${campaign.contentStrategy.emailSequence.map((email: any, idx: number) => `
+          <div class="channel-strategy">
+            <h4>Email ${idx + 1}: ${email.subject}</h4>
+            <p><strong>Preview:</strong> ${email.preview}</p>
+            <p><strong>Content:</strong> ${email.content}</p>
+          </div>
+        `).join('')}
+        ` : ''}
+
+        ${campaign.contentStrategy.adCopy ? `
+        <h3>Advertisement Copy</h3>
+        <h4>Headlines</h4>
+        ${campaign.contentStrategy.adCopy.headlines ? campaign.contentStrategy.adCopy.headlines.map((headline: string, idx: number) => `
+          <div class="metric-item">${headline}</div>
+        `).join('') : ''}
+
+        <h4>Descriptions</h4>
+        ${campaign.contentStrategy.adCopy.descriptions ? campaign.contentStrategy.adCopy.descriptions.map((desc: string, idx: number) => `
+          <div class="metric-item">${desc}</div>
+        `).join('') : ''}
+        ` : ''}
+      </div>
+      ` : ''}
+
+      ${campaign.actionPlan ? `
+      <div class="section">
+        <h2>30-Day Action Plan</h2>
+        ${Object.entries(campaign.actionPlan).map(([week, tasks]: [string, any]) => `
+          <div>
+            <h3>${week.replace(/([A-Z])/g, ' $1').trim()}</h3>
+            ${Array.isArray(tasks) ? `
+              <ul class="task-list">
+                ${tasks.map((task: string) => `<li>${task}</li>`).join('')}
+              </ul>
+            ` : `<p>${tasks}</p>`}
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      ${campaign.metrics ? `
+      <div class="section">
+        <h2>Key Performance Indicators (KPIs)</h2>
+        <ul class="kpi-list">
+          ${campaign.metrics.kpis ? campaign.metrics.kpis.map((kpi: string) => `<li>${kpi}</li>`).join('') : ''}
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>Tracking Tools</h2>
+        <ul>
+          ${campaign.metrics.trackingTools ? campaign.metrics.trackingTools.map((tool: string) => `<li>${tool}</li>`).join('') : ''}
+        </ul>
+      </div>
+      ` : ''}
+
+      ${campaign.channelStrategy ? `
+      <div class="section">
+        <h2>Channel Strategy</h2>
+        ${campaign.channelStrategy.map((channel: any, idx: number) => `
+          <div class="channel-strategy">
+            <h3>${channel.channel}</h3>
+            <p><strong>Strategy:</strong> ${channel.strategy}</p>
+            <p><strong>Budget:</strong> ${channel.budget}</p>
+            <p><strong>KPIs:</strong> ${channel.kpis ? channel.kpis.join(', ') : 'Not specified'}</p>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      ${campaign.budgetAllocation ? `
+      <div class="section">
+        <h2>Budget Allocation</h2>
+        ${Object.entries(campaign.budgetAllocation).map(([category, percentage]) => `
+          <div class="metric-item">
+            <strong>${category}:</strong> ${percentage}
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      <div style="margin-top: 40px; text-align: center; color: #666; font-size: 14px;">
+        <p>Generated by AI Solutions Hub - Marketing Campaign Generator</p>
+        <p>For more AI-powered marketing tools, visit our platform</p>
+      </div>
+    `;
+  };
+
+
+
+
+
+`;
+  };
+
+  const generateReadableContent = (campaign: any) => {
+    let content = `MARKETING CAMPAIGN: ${campaign.campaignName || 'Marketing Campaign'}
+Generated by AI Solutions Hub - ${new Date().toLocaleDateString()}
+
+CAMPAIGN OVERVIEW
+================
+${campaign.overview || 'No overview available'}
+
+CAMPAIGN DETAILS
+===============
+Business Type: ${formData.businessType || 'Not specified'}
+Target Audience: ${formData.targetAudience || 'Not specified'}  
+Campaign Goals: ${formData.campaignGoals || 'Not specified'}
+Budget: ${formData.budget || 'Not specified'}
+Timeline: ${formData.timeline || '30'} days
+Marketing Channels: ${formData.channels.length > 0 ? formData.channels.map((channel: string) => channel.replace('_', ' ')).join(', ') : 'No channels specified'}
+
+`;
+
+    if (campaign.contentStrategy) {
+      content += 'CONTENT STRATEGY\n';
+      content += '===============\n\n';
+      
+      if (campaign.contentStrategy.socialMediaPosts) {
+        content += 'Social Media Posts:\n';
+        content += campaign.contentStrategy.socialMediaPosts.map((post: any, idx: number) => 
+          `  ${post.platform}:\n  Caption: ${post.caption}\n  Hashtags: ${post.hashtags ? post.hashtags.join(', ') : 'None'}\n`
+        ).join('\n');
+        content += '\n';
+      }
+
+      if (campaign.contentStrategy.emailSequence) {
+        content += 'Email Marketing Sequence:\n';
+        content += campaign.contentStrategy.emailSequence.map((email: any, idx: number) => 
+          `  Email ${idx + 1}: ${email.subject}\n  Preview: ${email.preview}\n  Content: ${email.content}\n`
+        ).join('\n');
+        content += '\n';
+      }
+
+      if (campaign.contentStrategy.adCopy) {
+        content += 'Advertisement Copy:\n  Headlines:\n';
+        if (campaign.contentStrategy.adCopy.headlines) {
+          content += campaign.contentStrategy.adCopy.headlines.map((headline: string) => `    • ${headline}`).join('\n');
+        }
+        content += '\n  Descriptions:\n';
+        if (campaign.contentStrategy.adCopy.descriptions) {
+          content += campaign.contentStrategy.adCopy.descriptions.map((desc: string) => `    • ${desc}`).join('\n');
+        }
+        content += '\n';
+      }
+    }
+
+    if (campaign.actionPlan) {
+      content += '30-DAY ACTION PLAN\n';
+      content += '=================\n';
+      content += Object.entries(campaign.actionPlan).map(([week, tasks]: [string, any]) => 
+        `${week.replace(/([A-Z])/g, ' $1').trim()}:\n${Array.isArray(tasks) ? tasks.map((task: string) => `  • ${task}`).join('\n') : `  • ${tasks}`}`
+      ).join('\n\n');
+      content += '\n\n';
+    }
+
+    if (campaign.metrics) {
+      content += 'KEY PERFORMANCE INDICATORS (KPIs)\n';
+      content += '===============================\n';
+      if (campaign.metrics.kpis) {
+        content += campaign.metrics.kpis.map((kpi: string) => `• ${kpi}`).join('\n');
+      }
+      content += '\n\nTRACKING TOOLS\n=============\n';
+      if (campaign.metrics.trackingTools) {
+        content += campaign.metrics.trackingTools.map((tool: string) => `• ${tool}`).join('\n');
+      }
+      content += '\n\n';
+    }
+
+    if (campaign.channelStrategy) {
+      content += 'CHANNEL STRATEGY\n===============\n';
+      content += campaign.channelStrategy.map((channel: any, idx: number) => 
+        `${channel.channel}:\n  Strategy: ${channel.strategy}\n  Budget: ${channel.budget}\n  KPIs: ${channel.kpis ? channel.kpis.join(', ') : 'Not specified'}`
+      ).join('\n\n');
+      content += '\n\n';
+    }
+
+    if (campaign.budgetAllocation) {
+      content += 'BUDGET ALLOCATION\n===============\n';
+      content += Object.entries(campaign.budgetAllocation).map(([category, percentage]) => `${category}: ${percentage}`).join('\n');
+      content += '\n\n';
+    }
+
+    content += '---Generated by AI Solutions Hub\nFor more AI-powered marketing tools, visit our platform\nVisit: https://b5nss1sw05jo.space.minimax.io';
+
+    return content;
+  };
+
+  const exportCampaign = async () => {
+    if (!campaign) {
+      return;
+    }
+    
+    setDownloadLoading(true);
+    
+    try {
+      // Generate beautiful HTML content for PDF conversion
+      const htmlContent = generateHTMLContent(campaign);
+      
+      // Create a new window for PDF generation
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
+      }
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${campaign.campaignName || 'Marketing Campaign'}</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 40px 20px;
+              line-height: 1.6;
+              color: #333;
+            }
+            h1 {
+              color: #2563eb;
+              border-bottom: 3px solid #e5e7eb;
+              padding-bottom: 10px;
+            }
+            h2 {
+              color: #1e40af;
+              margin-top: 30px;
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 5px;
+            }
+            h3 {
+              color: #1e3a8a;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+              padding: 20px;
+              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+              color: white;
+              border-radius: 10px;
+            }
+            .overview {
+              background: #f8fafc;
+              padding: 20px;
+              border-radius: 8px;
+              border-left: 4px solid #3b82f6;
+              margin: 20px 0;
+            }
+            .section {
+              margin: 30px 0;
+              padding: 20px;
+              border-radius: 8px;
+              border: 1px solid #e5e7eb;
+            }
+            .metric-item, .task-item {
+              padding: 10px;
+              margin: 8px 0;
+              background: #f9fafb;
+              border-radius: 6px;
+              border-left: 3px solid #10b981;
+            }
+            .channel-strategy {
+              background: #fefce8;
+              padding: 15px;
+              margin: 10px 0;
+              border-radius: 6px;
+              border-left: 3px solid #eab308;
+            }
+            .kpi-list, .task-list {
+              list-style: none;
+              padding: 0;
+            }
+            .kpi-list li::before {
+              content: "📈 ";
+            }
+            .task-list li::before {
+              content: "✅ ";
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+            .print-button {
+              position: fixed;
+              top: 20px;
+              right: 20px;
+              background: #3b82f6;
+              color: white;
+              padding: 10px 20px;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              z-index: 1000;
+            }
+          </style>
+        </head>
+        <body>
+          <button class="print-button no-print" onclick="window.print()">Print/Save as PDF</button>
+          ${htmlContent}
+          <script>
+            // Auto-open print dialog after content loads
+            setTimeout(() => {
+              window.print();
+            }, 1000);
+          </script>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Download failed. Please try again.');
+    } finally {
+      // Clear loading state with delay to ensure user sees the completion
+      setTimeout(() => {
+        setDownloadLoading(false);
+      }, 1000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Dashboard</span>
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Marketing & Business Growth</h1>
+                <p className="text-sm text-gray-500">AI-Powered Campaign Generator</p>
+              </div>
+            </div>
+            <div className="w-32"></div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {campaign ? (
+          /* Campaign Results View */
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-3xl font-bold text-gray-900">{campaign.campaignName}</h2>
+                    {campaign.isFallback && (
+                      <span className="px-3 py-1 bg-amber-100 text-amber-800 text-sm font-medium rounded-full border border-amber-200">
+                        Quick Preview
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-600">{campaign.overview}</p>
+                  {campaign.isFallback && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        📝 <strong>Note:</strong> This is a quick preview of your campaign. A more detailed AI-generated version will be available soon.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={copyToClipboard}
+                    disabled={copySuccess}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                      copySuccess 
+                        ? 'bg-green-100 text-green-700 border border-green-300' 
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {copySuccess ? (
+                      <>
+                        <CheckCircle className="w-4 h-4" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={exportCampaign}
+                    disabled={downloadLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition"
+                  >
+                    {downloadLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Downloading...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        Download
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Strategy */}
+              {campaign.contentStrategy && (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    Content Strategy
+                  </h3>
+                  
+                  {/* Social Media Posts */}
+                  {campaign.contentStrategy.socialMediaPosts && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold mb-3">Social Media Posts</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {campaign.contentStrategy.socialMediaPosts.map((post: any, idx: number) => (
+                          <div key={idx} className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-2xl">{post.platform === 'LinkedIn' ? '💼' : post.platform === 'Twitter' ? '🐦' : '📱'}</span>
+                              <span className="font-semibold">{post.platform}</span>
+                            </div>
+                            <p className="text-gray-700 mb-2">{post.caption}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {post.hashtags?.map((tag: string, i: number) => (
+                                <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Email Sequence */}
+                  {campaign.contentStrategy.emailSequence && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold mb-3">Email Marketing Sequence</h4>
+                      <div className="space-y-3">
+                        {campaign.contentStrategy.emailSequence.map((email: any, idx: number) => (
+                          <div key={idx} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">Email {idx + 1}</span>
+                              <span className="font-semibold text-gray-900">{email.subject}</span>
+                            </div>
+                            <p className="text-gray-600 text-sm">{email.preview}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ad Copy */}
+                  {campaign.contentStrategy.adCopy && (
+                    <div>
+                      <h4 className="font-semibold mb-3">Ad Copy Variations</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 mb-2">Headlines</p>
+                          {campaign.contentStrategy.adCopy.headlines?.map((headline: string, idx: number) => (
+                            <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                              <p className="font-medium">{headline}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 mb-2">Descriptions</p>
+                          {campaign.contentStrategy.adCopy.descriptions?.map((desc: string, idx: number) => (
+                            <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                              <p className="text-sm text-gray-700">{desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Action Plan */}
+              {campaign.actionPlan && (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    30-Day Action Plan
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {Object.entries(campaign.actionPlan).map(([week, tasks]: [string, any], idx) => (
+                      <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
+                        <h4 className="font-semibold mb-3 capitalize">{week.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                        <ul className="space-y-2">
+                          {Array.isArray(tasks) ? tasks.map((task: string, i: number) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span>{task}</span>
+                            </li>
+                          )) : null}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Metrics */}
+              {campaign.metrics && (
+                <div>
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-600" />
+                    KPIs & Metrics
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold mb-3">Key Performance Indicators</h4>
+                      <ul className="space-y-2">
+                        {campaign.metrics.kpis?.map((kpi: string, idx: number) => (
+                          <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                            <Zap className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                            <span>{kpi}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold mb-3">Tracking Tools</h4>
+                      <ul className="space-y-2">
+                        {campaign.metrics.trackingTools?.map((tool: string, idx: number) => (
+                          <li key={idx} className="text-sm text-gray-700">{tool}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => { setCampaign(null); setStep(1); }}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold transition"
+                >
+                  Create Another Campaign
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Campaign Wizard */
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              {/* Progress Bar */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-2">
+                  {[1, 2, 3].map((s) => (
+                    <div
+                      key={s}
+                      className={`flex-1 h-2 rounded-full mx-1 ${
+                        s <= step ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
+                      }`}
+                    ></div>
+                  ))}
+                </div>
+                <p className="text-center text-sm text-gray-600">
+                  Step {step} of 3
+                </p>
+              </div>
+
+              {/* Step 1: Business & Audience */}
+              {step === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Tell us about your business</h2>
+                    <p className="text-gray-600">We'll create a custom marketing strategy for you</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Business Type
+                    </label>
+                    <select
+                      value={formData.businessType}
+                      onChange={(e) => handleInputChange('businessType', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select your business type</option>
+                      {businessTypes.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Target Audience
+                    </label>
+                    <textarea
+                      value={formData.targetAudience}
+                      onChange={(e) => handleInputChange('targetAudience', e.target.value)}
+                      placeholder="Describe your ideal customer (age, location, interests, behaviors...)"
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Brand Information (Optional)
+                    </label>
+                    <textarea
+                      value={formData.brandInfo}
+                      onChange={(e) => handleInputChange('brandInfo', e.target.value)}
+                      placeholder="Tell us about your brand voice, values, unique selling points..."
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    onClick={() => setStep(2)}
+                    disabled={!formData.businessType || !formData.targetAudience}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    Continue
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2: Goals & Budget */}
+              {step === 2 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Campaign Goals & Budget</h2>
+                    <p className="text-gray-600">Define what success looks like</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Primary Goal
+                    </label>
+                    <select
+                      value={formData.campaignGoals}
+                      onChange={(e) => handleInputChange('campaignGoals', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select your primary goal</option>
+                      {goals.map((goal) => (
+                        <option key={goal} value={goal}>{goal}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Monthly Budget
+                    </label>
+                    <select
+                      value={formData.budget}
+                      onChange={(e) => handleInputChange('budget', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select your budget range</option>
+                      <option value="$500-$1,000">$500 - $1,000</option>
+                      <option value="$1,000-$5,000">$1,000 - $5,000</option>
+                      <option value="$5,000-$10,000">$5,000 - $10,000</option>
+                      <option value="$10,000+">$10,000+</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Campaign Duration
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {['30', '60', '90'].map((days) => (
+                        <button
+                          key={days}
+                          onClick={() => handleInputChange('timeline', days)}
+                          className={`py-3 rounded-lg font-semibold transition ${
+                            formData.timeline === days
+                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {days} Days
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setStep(1)}
+                      className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={() => setStep(3)}
+                      disabled={!formData.campaignGoals}
+                      className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Channels */}
+              {step === 3 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Marketing Channels</h2>
+                    <p className="text-gray-600">Select where you want to reach your audience</p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {channels.map((channel) => (
+                      <button
+                        key={channel.id}
+                        onClick={() => toggleChannel(channel.id)}
+                        className={`p-4 rounded-lg border-2 transition text-left ${
+                          formData.channels.includes(channel.id)
+                            ? 'border-blue-600 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">{channel.icon}</span>
+                          <div>
+                            <p className="font-semibold">{channel.label}</p>
+                            <p className="text-sm text-gray-600">Click to select</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setStep(2)}
+                      className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={generateCampaign}
+                      disabled={formData.channels.length === 0 || loading}
+                      className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          Generate Campaign
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
